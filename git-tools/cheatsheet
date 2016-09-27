@@ -1,6 +1,6 @@
 ## setting-up
 git config --global user.name maverickoo
-git config --gloabl user.email billnosdname@gmail.com
+git config --global user.email billnosdname@gmail.com
 git config credential.helper store
 git push http://example.com/repo.git
 
@@ -25,3 +25,6 @@ git checkout <source branch> <file>
 
 ## show remote URL
 git remote show origin
+
+## undo a file-add
+git reset <file>
