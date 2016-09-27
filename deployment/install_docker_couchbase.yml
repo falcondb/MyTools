@@ -1,0 +1,22 @@
+---
+- hosts: cb
+  sudo: yes
+  gather_facts: no
+  serial: "50%"
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+
+    - name: Remove couchbase docker container
+      shell: "sudo docker rm --force {{cb_container_name}}"
+      ignore_errors: yes
+
+    - name: Create couchbase directory # guarantee docker container can write
+      file: "path={{cb_var_location}} state=directory owner={{ansible_ssh_user}} group={{ansible_ssh_user}}"
+
+    - name: Install couchbase
+      shell: "sudo docker run -d --privileged
+              --net=host
+              --name {{cb_container_name}}
+              --volume {{cb_var_location}}:/opt/couchbase/var
+              {{cb_image}}"

@@ -1,0 +1,9 @@
+- hosts: jfrog
+  sudo: yes
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+    - name: Stop docker container
+      shell: sudo docker stop {{jfrog_docker_container}}
+      ignore_errors: yes # TODO add error handler

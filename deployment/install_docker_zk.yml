@@ -1,0 +1,16 @@
+- hosts: zk
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+    - name: Remvoe zk docker container
+      shell: "sudo docker rm --force {{zookeeper_container_name}}"
+      ignore_errors: yes
+      tags: remove
+
+    - name: Create zookeeper directory # guarantee docker container can write
+      file: "path={{zk_data_location}} state=directory owner=root group=root mode=0777 recurse=yes"
+
+    - name: Start zookeeper docker image
+      shell: "sudo docker run -d --privileged -p {{zk_port}}:2181 --name {{zookeeper_container_name}} -e HOSTNAME={{zk_host}}  -e ZK_DATA_DIR={{zk_data_location}} -v {{zk_data_location}}:{{zk_data_location}} {{zk_registry}}/{{zk_image}}:{{zk_version}}"

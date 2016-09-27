@@ -1,0 +1,53 @@
+- hosts: spardra
+  gather_facts: no
+  sudo: yes
+  serial: 1
+
+  tasks:
+    - name: Remove old containers for spark master
+      shell: docker rm -f {{ spark_master_container }}
+      when: inventory_hostname == "spark_master"
+      ignore_errors: yes
+
+    - name: Remove old containers for spardra
+      shell: docker rm -f {{ spardra_container }}
+      when: inventory_hostname != "spark_master"
+      ignore_errors: yes
+
+    - name: Start spark master
+      shell: "docker run -d --privileged --net=host --name={{ spark_master_container }}
+               -p 7000:7000
+               -p 7077:7077
+               -p 8080:8080
+               -p 8081:8081
+               -p 19202:19202
+               -e  SPARK_LOCAL_IP={{ host }}
+               -e  SPARK_MASTER_PORT=7077
+               {{ spark_master_image }}"
+      when: inventory_hostname == "spark_master"
+
+    # - file: path={{cassandra_commit_file}} state=absent
+    #   tags: misc
+    # - file: path={{cassandra_data_file}} state=absent
+    #   tags: misc
+
+    - name: Start spardra Slave
+      shell: "docker run  -d  --privileged --net=host --name={{ spardra_container }}
+              -p 7000:7000
+              -p 7077:7077
+              -p 8080:8080
+              -p 8081:8081
+              -p 19202:19202
+              -p 7199:7199
+              -v {{cassandra_commit_file}}:/var/lib/cassandra/commitlog
+              -v {{cassandra_data_file}}:/var/lib/cassandra/data
+              -e CASSANDRA_CLUSTER_NAME={{ cassandra_cluster_name }}
+              -e MODE=slave
+              -e  SPARK_MASTER={{ spark_master }}
+              -e  SPARK_LOCAL_IP={{ host }}
+              -e CASSANDRA_BROADCAST_ADDRESS={{ host }}
+              -e CASSANDRA_LISTEN_ADDRESS={{ host }}
+              -e CASSANDRA_SEEDS={{ cassandra_seed_ip }}
+              -e SPARK_HOST={{ host }}
+              {{ spark_cassandra_image }}"
+      when: inventory_hostname != "spark_master"

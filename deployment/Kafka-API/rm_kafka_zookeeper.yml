@@ -1,0 +1,21 @@
+- hosts: kafka
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+    - name: stop zookeeper
+      shell: sudo kill $(ps aux | grep zookeeper-server-start.sh | awk '{print $2}')
+      ignore_errors: yes
+
+    - name: stop kafka with the verison
+      shell: sudo kill $(ps aux | grep {{kafka_bin_location}}| awk '{print $2}')
+      ignore_errors: yes
+
+    - name: stop kafka
+      shell: sudo kill $(ps aux | grep zookeeper-server-start.sh | awk '{print $2}')
+      ignore_errors: yes
+
+    - name: remove kafka folder if exists
+      file: path={{kafka_bin_location}} state=absent
+      ignore_errors: yes

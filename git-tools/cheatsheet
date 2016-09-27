@@ -1,0 +1,27 @@
+## setting-up
+git config --global user.name maverickoo
+git config --gloabl user.email billnosdname@gmail.com
+git config credential.helper store
+git push http://example.com/repo.git
+
+## git tag
+git tag <tag_name>
+git push origin <tag_name>
+
+## git flow
+git flow init
+git flow feature start MYFEATURE
+## local merge
+git flow feature finish MYFEATURE
+## to remote
+git flow feature publish MYFEATURE
+
+git flow release start RELEASE
+git flow release publish RELEASE
+git flow release finish RELEASE
+
+## copy a file from another branch
+git checkout <source branch> <file>
+
+## show remote URL
+git remote show origin

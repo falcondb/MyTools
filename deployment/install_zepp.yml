@@ -1,0 +1,22 @@
+---
+- hosts: zeppelin
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+  tasks:
+    # - name: "Create data directory if not exist"
+    #   file: path=/data state=directory owner={{ansible_ssh_user}} group={{ansible_ssh_user}}
+
+    - name: "Remove Zeppelin home directory"
+      file: path={{zeppelin_home}} state=absent
+
+    - name: "Download Zeppelin"
+      get_url: url={{zeppelin_download_url}} dest={{zeppelin_home}}.tar.gz
+    # - name: "Download Zeppelin"
+    #   copy: src={{zeppelin_download_url}} dest={{zeppelin_home}}.tar.gz
+
+
+    - name: "Unarchive zeppelin"
+      # unarchive: src={{zepplin_home}}.tgz dest=/data/
+      shell: tar -xzvf {{zeppelin_home}}.tar.gz -C /data/ && chown -R {{ansible_ssh_user}}:{{ansible_ssh_user}} {{zeppelin_home}}
+      tags: unzip

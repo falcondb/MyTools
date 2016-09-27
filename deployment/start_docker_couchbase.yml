@@ -1,0 +1,9 @@
+---
+- hosts: cb
+  sudo: yes
+  gather_facts: no
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+    - name: start couchbase
+      shell: "sudo docker start {{cb_container_name}}"

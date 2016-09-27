@@ -1,0 +1,21 @@
+---
+- hosts: spark
+  gather_facts: no
+  serial: "50%"
+  remote_user: "{{ansible_ssh_user}}"
+  tasks:
+    - name: "Stop Spark Master"
+      shell: "{{spark_home}}/{{spark_version}}/sbin/stop-master.sh"
+      when: is_master|int == 1
+      ignore_errors: yes
+
+    - name: "Stop Spark Slave"
+      shell: "{{spark_home}}/{{spark_version}}/sbin/stop-slave.sh"
+      when: inventory_hostname != "sparkgateway"
+      tags: stop_slave
+      ignore_errors: yes
+
+    - name: "Stop History Server on sparkgateway"
+      shell: "{{spark_home}}/{{spark_version}}/sbin/stop-history-server.sh"
+      when: inventory_hostname == "sparkgateway"
+      ignore_errors: yes

@@ -1,0 +1,22 @@
+- hosts: jenkins
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+   - name: Remove docker container # remove existing container before start a new
+     shell: sudo docker rm --force {{jenkins_docker_container}}
+     ignore_errors: yes #TODO add error handler
+
+   - name: Remove jenkins_home directory
+     file: path={{jenkins_home}} state=absent
+
+   - name: Create jenkins_home directory # create jenkins_home and guarantee docker container can write
+     file: "path={{jenkins_home}} state=directory owner={{ansible_ssh_user}}
+            group={{ansible_ssh_user}}"
+
+   - name: Start jenkins docker container
+     shell: "sudo docker run -d --name={{jenkins_docker_container}}
+            -p {{http_forwarded_port}}:8080 -p 50000:50000 -v {{jenkins_home}}:/var/jenkins_home
+            {{jenkins_docker_registry}}{{jenkins_docker_image}}{{jenkins_docker_tag}}"
+

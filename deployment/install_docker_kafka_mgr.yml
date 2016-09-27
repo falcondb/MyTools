@@ -1,0 +1,17 @@
+- hosts: kafkamanager
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+    - name: "Remove kafka mgr docker container"
+      shell: "sudo docker stop {{kafka_mgr_container}}"
+      ignore_errors: yes
+      tags: remove
+
+    - name: "Remove kafka mgr docker container"
+      shell: "sudo docker rm --force {{kafka_mgr_container}}"
+      ignore_errors: yes
+
+    - name: "Start kafka manger docker image"
+      shell: "sudo docker run -d --name={{kafka_mgr_container}} -p {{kafka_mgr_http_port}}:9000 -e ZK_HOSTS={{zk_host}} {{kafka_mgr_registry}}{{kafka_mgr_image}}{{kafka_mgr_version}}"

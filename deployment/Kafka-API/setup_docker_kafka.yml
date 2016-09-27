@@ -1,0 +1,11 @@
+- hosts: all
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+   - name: Remove kafka data directory
+     file: path={{kafka_data_location}} state=absent
+
+   - name: Create kafka data directory
+     file: path={{kafka_data_location}} state=directory

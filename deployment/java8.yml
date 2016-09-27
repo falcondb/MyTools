@@ -1,0 +1,24 @@
+---
+- hosts: all
+  gather_facts: no
+  serial: "50%"
+  sudo: yes
+  tasks:
+    - name: Install Java Server
+      yum: name=java-1.8.0-openjdk-1.8.0.91-0.b14.el7_2.x86_64 state=present
+
+    - name: Remove JAVA_HOME
+      lineinfile:
+        state=absent
+        dest=/etc/environment
+        regexp='^JAVA_HOME'
+
+
+    - name: Set JAVA_HOME
+      lineinfile:
+        state=present
+        dest=/etc/environment
+        regexp='^JAVA_HOME'
+        line='JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.91-0.b14.el7_2.x86_64/jre'
+#        line='JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.91-1.b14.el7_2.x86_64/jre'
+      tags: test

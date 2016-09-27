@@ -1,0 +1,14 @@
+- hosts: grafana
+ sudo: True
+ gather_facts: yes
+ remote_user: "{{ansible_ssh_user}}"
+ tasks:
+   - name: Remove grafana container
+           shell: "sudo docker rm --force {{grafana_container_name}}"
+     ignore_errors: yes
+     - name: Create grafana directory # guarantee docker container can write
+           file: "path={{grafana_data_location}} state=directory owner=root group=root mode=0777 recurse=yes"
+   
+   - name: Start grafana docker image
+     shell: "sudo docker run -d --privileged --name {{grafana_container_name}}  -p 3000:3000 -v {{grafana_data_location}}:/var/lib/grafana {{grafana_repository}}/{{grafana_image}}:{{grafana_version}}"
+

@@ -1,0 +1,10 @@
+---
+- hosts: zeppelin
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+  tasks:
+    - name: "Start Zeppelin"
+      shell: "sudo {{zeppelin_home}}/bin/zeppelin-daemon.sh start"
+      environment:
+        ZEPPELIN_PORT: "{{zeppelin_port}}"

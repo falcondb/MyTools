@@ -1,0 +1,9 @@
+- hosts: cs
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+   - name: Stop cassandra cluster
+     shell: "sudo docker stop {{NodeName}}"
+     ignore_errors: yes

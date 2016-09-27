@@ -1,0 +1,68 @@
+---
+- hosts: spark
+  sudo: True
+  gather_facts: no
+  serial: "50%"
+  remote_user: "{{ansible_ssh_user}}"
+  vars:
+    nfs_spark_checkpoint_dir: /data/nfsshare/spark/spark_checkpoint
+
+  tasks:
+    - name: "Create home directory if not exist"
+      file: path={{spark_home}} state=directory owner={{ansible_ssh_user}} group={{ansible_ssh_user}} mode=0777
+
+    - name: "Create local checkpoing directory if not exist"
+      file: path={{spark_checkpoint_dir}} state=directory owner={{ansible_ssh_user}} group={{ansible_ssh_user}} mode=0777
+
+    - name: "Create nfs checkpoing directory if not exist"
+      file: path={{nfs_spark_checkpoint_dir}} state=directory owner={{ansible_ssh_user}} group={{ansible_ssh_user}} mode=0777
+      ignore_errors: yes
+      tags: nfs_checkpoint
+
+    - name: "Remove spark bin"
+      file: path={{spark_home}}/{{spark_version}} state=absent
+
+    - name: "Download spark"
+      get_url: url={{spark_download_url}} dest={{spark_home}}/{{spark_version}}.tgz
+
+    - name: "Unarchive spark"
+      shell: tar -xzvf {{spark_home}}/{{spark_version}}.tgz -C {{spark_home}} && chown -R {{ansible_ssh_user}}:{{ansible_ssh_user}} {{spark_home}}/{{spark_version}}
+
+    # Enable event logging in sparkgateway
+    - name: "Create eventlog directory if not exist"
+      file: path={{spark_eventlog_dir}} state=directory mode=0777
+      when: inventory_hostname == "sparkgateway"
+
+    - name: "Create history directory if not exist"
+      file: path={{spark_history_dir}} state=directory mode=0777
+      when: inventory_hostname == "sparkgateway"
+
+    - stat: path={{spark_home}}/{{spark_version}}/{{spark_conf}}
+      register: conf_file
+      when: inventory_hostname == "sparkgateway"
+
+    - name: "Create conf file if not exist"
+      file: path={{spark_home}}/{{spark_version}}/{{spark_conf}} state=touch mode=0777
+      when: (inventory_hostname == "sparkgateway" and conf_file.stat.exists == False)
+
+    - name: "Enable event logging and history"
+      lineinfile:
+          state=present
+          dest={{spark_home}}/{{spark_version}}/{{spark_conf}}
+          regexp='^spark.eventLog.enabled'
+          line='spark.eventLog.enabled  true'
+      when: inventory_hostname == "sparkgateway"
+
+    - lineinfile:
+          state=present
+          dest={{spark_home}}/{{spark_version}}/{{spark_conf}}
+          regexp='^spark.eventLog.dir'
+          line='spark.eventLog.dir   {{spark_eventlog_dir}}'
+      when: inventory_hostname == "sparkgateway"
+
+    - lineinfile:
+          state=present
+          dest={{spark_home}}/{{spark_version}}/{{spark_conf}}
+          regexp='^spark.history.fs.logDirectory'
+          line='spark.history.fs.logDirectory   {{spark_history_dir}}'
+      when: inventory_hostname == "sparkgateway"

@@ -1,0 +1,8 @@
+- hosts: kafkamanager
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+    - name: "Start kafka manger docker image"
+      shell: "sudo docker start {{kafka_mgr_container}}"

@@ -1,0 +1,22 @@
+- hosts: jfrog
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+   - name: Remove docker container # remove existing container before start a new
+     shell: sudo docker rm --force {{jfrog_docker_container}}
+     ignore_errors: yes #TODO add error handler
+
+   - name: Remove jfrog_data directory
+     file: path={{jfrog_data}} state=absent
+
+   - name: Create jfrog_data directory # create jenkins_home and guarantee docker container can write
+     file: "path={{jfrog_data}} state=directory owner={{ansible_ssh_user}}
+            group={{ansible_ssh_user}}"
+
+   - name: Start jfrog docker container
+     shell: "sudo docker run -d --name={{jfrog_docker_container}}
+            -p {{http_forwarded_port}}:8081 -v {{jfrog_data}}:/var/opt/jfrog/artifactory/data
+            {{jfrog_docker_registry}}{{jfrog_docker_image}}{{jfrog_docker_tag}}"
+

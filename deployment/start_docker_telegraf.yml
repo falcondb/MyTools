@@ -1,0 +1,16 @@
+- hosts: telegraf
+ sudo: True
+ gather_facts: yes
+ remote_user: "{{ansible_ssh_user}}"
+ tasks:
+   - name: Remove telegraf container
+     shell: "sudo docker rm --force {{telegraf_container_name}}"
+     ignore_errors: yes
+
+   - name: Create telegraf directory # guarantee docker container can write
+     file: "path={{telegraf_data_location}} state=directory owner=root group=root mode=0777 recurse=yes"
+
+               - name: Copy the telegraf configuration file
+     copy: src=./telegraf.conf dest={{telegraf_data_location}}/telegraf.conf owner=root group=root mode=0644
+   - name: Start telegraf docker image
+     shell: "sudo docker run -d --privileged  --name {{telegraf_container_name}} -v {{telegraf_data_location}}/telegraf.conf:/etc/telegraf/telegraf.conf -e influxdb_url={{influxdb_url}}  -e influxdb_port={{influxdb_port}}  -h {{ansible_ssh_host}} {{telegraf_image}}:{{telegraf_version}}"

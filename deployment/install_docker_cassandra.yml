@@ -1,0 +1,50 @@
+- hosts: cs
+  sudo: True
+  serial: 1
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+   - name: Remove docker container # remove existing container before start a new
+     shell: sudo docker rm --force {{NodeName}}
+     ignore_errors: yes #TODO add error handler
+
+  #  - file: path={{cassandra_commit_file}} state=absent
+  #  - file: path={{cassandra_data_file}} state=absent
+
+   - name: Create commitlog directory
+     file: "path={{cassandra_commit_file}} state=directory owner={{ansible_ssh_user}}
+            group={{ansible_ssh_user}}"
+
+   - name: Create data directory
+     file: "path={{cassandra_data_file}} state=directory owner={{ansible_ssh_user}}
+            group={{ansible_ssh_user}}"
+   # - name: Remove cassandra system directory
+   #   file: path={{cassandraSystemFile}} state=absent
+   - file: path=/data/cassandra/conf state=absent
+
+   - name: "Copy /etc/cassandra to /data/cassandra/conf/etc/cassandra"
+     file: path=/data/cassandra/conf/ state=directory mode=0777
+   - copy: src=./resources/etc/cassandra/ dest=/data/cassandra/conf/etc/cassandra/  directory_mode=0777 mode=0777
+     tags: copy
+
+   - name: Start cassandra docker image
+     shell: "sudo docker run -d --privileged --name={{NodeName}}  --net=host -p 7000:7000 \
+        -p 19202:19202  \
+        -p 7199:7199    \
+        -v /data/cassandra/conf/etc/cassandra:/etc/cassandra
+        -e CASSANDRA_CLUSTER_NAME={{ClusterName}}    \
+        -e CASSANDRA_BROADCAST_ADDRESS={{nodeIP}}  \
+        -e CASSANDRA_LISTEN_ADDRESS={{nodeIP}}  \
+        -e CASSANDRA_SEEDS={{seedIP}}  \
+        -v {{cassandra_commit_file}}:/var/lib/cassandra/commitlog \
+        -v {{cassandra_data_file}}:/var/lib/cassandra/data  \
+        {{cassandra_image}}:{{cassandra_version}}"
+
+   # - name: Start cassandra docker image
+   #   shell: "sudo docker run -d --name={{NodeName}}  --net=host -p 7000:7000 \
+   #      -e CASSANDRA_CLUSTER_NAME={{ClusterName}}    \
+   #      -e CASSANDRA_BROADCAST_ADDRESS={{nodeIP}}  \
+   #      -e CASSANDRA_LISTEN_ADDRESS={{nodeIP}}  \
+   #      -e CASSANDRA_SEEDS={{seedIP}}  \
+   #      {{cassandra_image}}:{{cassandra_version}}"

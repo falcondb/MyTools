@@ -1,0 +1,89 @@
+- hosts: kafka
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+   # - name: make sure docker-python RPM is not installed
+   #   yum:
+   #      name: docker-python
+   #      state: absent
+
+   # - name: make sure pip is installed
+   #   shell : sudo curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+
+   # - name: install pip
+   #   shell : sudo python get-pip.py
+
+   # - name: make sure required PyPi packages are installed
+   #   pip: name={{ item }} state=present
+   #   with_items:
+   #      - docker-py==1.2.3
+   #      - six>=1.4.0
+
+  #  - name: Start kafka docker image
+  #    docker:
+  #       name: kafka
+  #       image: "{{kafka_registry}}/{{kafka_image}}:{{kafka_version}}"
+  #       state: started
+  #       pull: always
+  #       ports:
+  #          - "{{kafka_port}}:{{kafka_port}}"
+  #       env:
+  #            KAFKA_BROKER_ID:{{broker_id}}
+  #            KAFKA_PORT:{{kafka_port}}
+  #            KAFKA_HOST_NAME:{{ansible_ssh_host}}
+  #            KAFKA_ADVERTISED_HOST_NAME:{{ansible_ssh_host}}
+  #            KAFKA_NUM_NETWORK_THREADS:4
+  #            KAFKA_NUM_IO_THREADS:8
+  #            KAFKA_SOCKET_SEND_BUFFER_BYTES:102400
+  #            KAFKA_SOCKET_RECEIVE_BUFFER_BYTES:102400
+  #            KAFKA_SOCKET_REQUEST_MAX_BYTES:104857600
+  #            KAFKA_NUM_PARTITIONS:1
+  #            KAFKA_NUM_RECOVERY_THREADS_PER_DATA_DIR:1
+  #            KAFKA_LOG_RETENTION_HOURS:1
+  #            KAFKA_LOG_SEGMENT_BYTES:1073741824
+  #            KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS:300000
+  #            KAFKA_LOG_CLEANER_ENABLE:false
+  #            KAFKA_ZOOKEEPER_CONNECT:{{zk_addr}}
+  #            JMX_PORT:9201
+   - name: Remvoe kafka docker container
+     shell:  sudo docker rm --force {{kafka_container_name}}
+     ignore_errors: yes
+     tags: remove
+
+  #  - file: "path={{kafka_logs_location}} state=absent"
+  #  - file: "path={{kafka_data_location}} state=absent"
+
+   - name: Create kafka directory # guarantee docker container can write
+     file: "path={{kafka_data_location}} state=directory owner={{ansible_ssh_user}} group={{ansible_ssh_user}} recurse=yes mode=0777"
+   - file: "path={{kafka_logs_location}} state=directory owner={{ansible_ssh_user}} group={{ansible_ssh_user}} mode=0777 recurse=yes"
+
+
+
+   - name: Start kafka docker image
+     shell : "sudo docker run -d --privileged
+        --name {{kafka_container_name}}
+        --volume {{kafka_data_location}}:/data
+        --volume {{kafka_logs_location}}:/logs
+        -p {{kafka_port}}:{{kafka_port}}
+        -p 19201:19201
+        -e KAFKA_BROKER_ID={{broker_id}}
+        -e KAFKA_PORT={{kafka_port}}
+        -e KAFKA_HOST_NAME={{ansible_ssh_host}}
+        -e KAFKA_ADVERTISED_HOST_NAME={{ansible_ssh_host}}
+        -e KAFKA_NUM_NETWORK_THREADS=4
+        -e KAFKA_NUM_IO_THREADS=8
+        -e KAFKA_SOCKET_SEND_BUFFER_BYTES=102400
+        -e KAFKA_SOCKET_RECEIVE_BUFFER_BYTES=102400
+        -e KAFKA_SOCKET_REQUEST_MAX_BYTES=104857600
+        -e KAFKA_NUM_PARTITIONS=1
+        -e KAFKA_NUM_RECOVERY_THREADS_PER_DATA_DIR=1
+        -e KAFKA_LOG_RETENTION_HOURS=1
+        -e KAFKA_LOG_SEGMENT_BYTES=1073741824
+        -e KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS=300000
+        -e KAFKA_LOG_CLEANER_ENABLE=false
+        -e ZOOKEEPER_CONNECTION_STRING={{zk_addr}}
+        -e JMX_PORT=19201
+        -e KAFKA_LOG_DIR=/
+        {{kafka_registry}}/{{kafka_image}}:{{kafka_version}}"

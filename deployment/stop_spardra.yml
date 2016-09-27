@@ -1,0 +1,12 @@
+- hosts: spardra
+  gather_facts: no
+  sudo: yes
+
+  tasks:
+    - name: Stop spardra worker
+      shell: docker stop {{ spardra_container }}
+      when: inventory_hostname != "spark_master"
+
+    - name: Stop spark master
+      shell: docker stop {{ spark_master_container }}
+      when: inventory_hostname == "spark_master"

@@ -1,0 +1,9 @@
+- hosts: cs
+  sudo: True
+  serial: 1
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+   - name: Start cassandra cluster
+     shell: "sudo docker start {{NodeName}}"

@@ -1,0 +1,9 @@
+- hosts: jenkins
+  sudo: yes
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+    - name: Stop jenkins
+      shell: "sudo docker stop {{jenkins_docker_container}}"
+      ignore_errors: yes # TODO add error handler

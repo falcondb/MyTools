@@ -1,0 +1,14 @@
+- hosts: cb
+  gather_facts: no
+  vars:
+    - cb_user: labadmin
+    - cb_password: 59Lab123
+  tasks:
+    - name: "Init cb node"
+      shell: curl -v -X POST http://{{ ansible_ssh_host }}:8091/nodes/self/controller/settings -d path=/opt/couchbase/var/lib/couchbase/data -d index_path=/opt/couchbase/var/lib/couchbase/data
+
+    - name: "Set up username and password"
+      shell: curl -v -X POST http://{{ ansible_ssh_host }}:8091/settings/web -d password={{ cb_password }} -d username={{ cb_user }} -d port=8091
+
+    - name: "Add to cluster"
+      shell: curl -u labadmin:59Lab123  http://{{ cb_master }}:8091/controller/addNode -d hostname={{ ansible_ssh_host }} -d username={{ cb_user }} -d password={{ cb_password }}

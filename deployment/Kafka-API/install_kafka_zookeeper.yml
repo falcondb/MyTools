@@ -1,0 +1,46 @@
+- hosts: kafka
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+    - name: stop zookeeper
+      shell: sudo kill $(ps aux | grep zookeeper-server-start.sh | awk '{print $2}')
+      ignore_errors: yes
+
+    - name: stop kafka with the verison
+      shell: sudo kill $(ps aux | grep {{kafka_bin_location}}| awk '{print $2}')
+      ignore_errors: yes
+
+    - name: stop kafka
+      shell: sudo kill $(ps aux | grep zookeeper-server-start.sh | awk '{print $2}')
+      ignore_errors: yes
+
+    - name: remove kafka folder if exists
+      file: path={{kafka_bin_location}} state=absent
+      ignore_errors: yes
+
+    - name: copy 0.9.0 kafka package
+      copy: src=./{{kafka_install_file}} dest=/tmp/{{kafka_install_file}} mode=0666
+
+    - name: install kafka
+      shell: tar -xzf /tmp/{{kafka_install_file}}
+
+    - name: copy kafka perporty file
+      copy: src=./{{kf_property}} dest={{kafka_bin_location}}/config/server.properties
+
+    - name: copy zookeeper perporty file
+      copy: src=./{{zk_property}} dest={{kafka_bin_location}}/config/zookeeper.properties
+      when: inventory_hostname == "kafka01"
+
+
+    - name: start zookeeper
+      shell: cd {{kafka_bin_location}} && touch zookeeper-bootup.log && chmod a+w zookeeper-bootup.log && nohup bin/zookeeper-server-start.sh config/zookeeper.properties > zookeeper-bootup.log 2>&1 &
+      when: inventory_hostname == "kafka01"
+
+    - name: start kafka
+      shell: sleep 5 && cd {{kafka_bin_location}} && touch kafka-bootup.log && chmod a+w kafka-bootup.log && nohup bin/kafka-server-start.sh config/server.properties > kafka-bootup.log &
+
+    - name: validation
+      shell: "sleep 5 && {{kafka_bin_location}}/bin/kafka-topics.sh --list --zookeeper localhost"
+      when: inventory_hostname == "kafka01"

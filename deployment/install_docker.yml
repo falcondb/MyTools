@@ -1,0 +1,17 @@
+- hosts: all
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+
+   - name: Yum update
+     shell : sudo yum -y update
+
+   - name: Run the docker installation script
+     shell : curl -fsSL https://get.docker.com/ | sh
+
+   - name: Start the docker daemon
+     shell : sudo service docker start
+
+

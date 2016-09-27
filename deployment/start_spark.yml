@@ -1,0 +1,19 @@
+---
+- hosts: spark
+  gather_facts: no
+  serial: "50%"
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+    - name: "Runs Spark Master"
+      shell: "{{spark_home}}/{{spark_version}}/sbin/start-master.sh -h {{ spark_master }} --webui-port {{ spark_master_port }}"
+      when: is_master|int == 1
+
+    - name: "Run Spark Slave"
+      shell: "{{spark_home}}/{{spark_version}}/sbin/start-slave.sh -h {{ spark_slave }} spark://{{ spark_master }}:7077"
+      when: inventory_hostname != "sparkgateway"
+      tags: start_slave
+
+    - name: "Run History Server on sparkgateway"
+      shell: "{{spark_home}}/{{spark_version}}/sbin/start-history-server.sh {{spark_history_dir}}"
+      when: inventory_hostname == "sparkgateway"
