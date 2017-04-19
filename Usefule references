@@ -1,0 +1,42 @@
+GDB:
+http://www.yolinux.com/TUTORIALS/GDB-Commands.html
+
+Makefile
+https://www.gnu.org/software/make/manual/html_node/Quick-Reference.html
+
+Maven
+https://eckobar.files.wordpress.com/2007/02/maven-cheatsheet.pdf
+
+Remote display on Mac
+http://oroborosx.sourceforge.net/remotex.html
+
+ClearCase
+http://lanz.us/cheatsheet.html
+
+Docker
+https://github.com/wsargent/docker-cheat-sheet
+
+shellcheck
+https://github.com/koalaman/shellcheck
+
+Sublime shellcheck
+https://github.com/SublimeLinter/SublimeLinter-shellcheck
+
+Sublime yaml
+https://packagecontrol.io/packages/Pretty%20YAML
+
+Bash manual
+https://www.gnu.org/software/bash/manual/bash.html
+
+ulimit
+http://ss64.com/bash/ulimit.html
+
+ssh 
+https://linux.die.net/man/1/ssh
+
+autoconf
+https://www.gnu.org/software/autoconf/autoconf.html
+
+glib dynamic loading modules, OS portibility
+https://developer.gnome.org/glib/stable/glib-Dynamic-Loading-of-Modules.html
+libltdl https://www.gnu.org/software/libtool/manual/html_node/Using-libltdl.html

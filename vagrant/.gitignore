@@ -1,0 +1,4 @@
+.zip
+.vagrant
+../deployment/misc/
+../deployment/spardra.ini.*

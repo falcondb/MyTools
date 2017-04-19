@@ -1,0 +1,16 @@
+### gcc options ###
+gcc --help
+
+
+## run preprocessor, output the results ##
+gcc -E 
+## output macro definition ##
+gcc -E -dD
+## output macro definition only ##
+gcc -E -dM
+
+## gdb can see all the details ##
+-ggdb3
+
+## static code anaysis ##
+-Wall -pedantic

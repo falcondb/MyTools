@@ -1,0 +1,5 @@
+### need a GUI ###
+config.vm.provider "virtualbox" do | v |
+    v.gui = true
+end
+install Xfce

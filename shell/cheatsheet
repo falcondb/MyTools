@@ -1,0 +1,2 @@
+setenforce - modify the mode SELinux is running in.
+setenforce [ Enforcing | Permissive | 1 | 0 ]

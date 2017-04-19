@@ -1,0 +1,8 @@
+### Copy public key to a remote machine
+cat ~/.ssh/id_rsa.pub | ssh root@192.168.11.100 'cat >> .ssh/authorized_keys'
+
+### send a notification email after a bash job is done
+echo "$BASH_SOURCE on $HOSTNAME is done" | mail -s "$BASH_SOURCE on $HOSTNAME is done" NAME@XXX.com
+
+### Count lines of files ###
+find src -name "*.c" | xargs wc -l

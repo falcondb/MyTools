@@ -1,0 +1,76 @@
+### gdb init script ###
+$HOME/.gdbinit
+
+### gdb with arguments ###
+gdb --args executable arg1 ...
+
+### gdb attach to a running process ###
+gdb attach $(pgrep PROCNAME)
+
+### gdb a core dump ###
+gdb executable coreDump
+
+### gdb only current thread ###
+set scheduler-locking on
+
+### print backtrace of all threads ###
+thread apply all bt full
+
+### commands after break point ###
+break abc() if x > 1
+commands / comand 1
+XXX
+continue
+end
+
+### set break point at the beginning of function's assemble code, not the beginning of the source code ###
+b *<function_name>
+
+### Examining the Symbol Table ###
+info address symbol
+info symbol addr
+whatis expr 
+info types regexp
+info scope addr
+
+### signal  ###
+signal signal
+
+### specify files ###
+symbol-file
+exec-file
+core-file
+
+### Endian ###
+set endian big/little/auto
+
+### User-defined command ###
+
+### Macro ###
+macro exp expression
+info macro macro
+
+### Tracepoints  ###
+
+### Run-time ###
+info locals
+info args
+
+### Checkpoint ###
+checkpoint
+
+## using gdbserver: remote debugger ##
+### install gdbserver on target machine ###
+yum/apt-get install gdb-gdbserver
+### on target machine ###
+gdbserver CLIENTIP:PORT EXECUTABLE
+### on client machine ###
+gdb
+target remote TARGETIP:PORT 
+
+### use GDB remote stub ###
+### See 17.3 in book "Debugging with GDB" ###
+get the gdb stub for the host architecture
+call set_debug_traps() at the begining of the program
+
+To do: find gdb stub for intel x64 architecture

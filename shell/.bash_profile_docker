@@ -1,0 +1,13 @@
+DK_container=yf_docker_c
+Dksl_image=yf_dskl_i
+Dksl_container=yf_dskl_c
+
+alias dk='docker'
+alias dkrml='docker rm $(docker ps -l -q)'
+alias dki='function __dki() { docker exec -it $1 bash ; }; __dki'
+alias dkr='function __dkr() { docker run -it --name $DK_container $1 bash; }; __dkr()'
+alias dksl='docker rmi $Dksl_image 2>&1 > /dev/null && \
+	    docker rm -f $Dksl_container 2>$1 > dev/null && \ 	
+	    docker commit $(docker ps -a | grep Exited | head -1 | cut -f1 -d " ") $Dksl_image && \
+            docker run -it --name $Dksl_container $Dksl_image bash '
+

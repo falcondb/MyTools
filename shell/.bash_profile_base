@@ -1,0 +1,33 @@
+alias ltr='ls -ltr'
+alias ll='ls -l'
+alias dir='ls -l'
+alias cd='function __mycd() { cd $1; echo "PWD: $PWD"; }; __mycd'
+alias gh='history | grep'
+alias mysh='ssh -X'
+alias mykill=function __mykill() { kill -9 $(pgrep $1 }; __mykill'
+
+HISTSIZE=100000
+HISTFILESIZE=2000
+
+export PATH=$PATH:/usr/local/sbin/
+
+export EDITOR='subl -w'
+
+
+make_tunnel() {
+if [[ $# -ne 3 ]]; then
+    echo "Function takes 3 parameters 1: Local Port 2: Remote IP 3: Remote Port"
+else
+    ssh -f WHO@SERVER -L 0.0.0.0:$1:$2:$3 -N
+fi
+}
+
+ssh_tunnel(){
+if [[ $# -ne 1 ]]; then
+        echo "need 1 parameter"
+else
+         ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/nul -i ~/.ssh/insecure_key root@localhost -p $1
+fi
+}
+PS1="\[\033[1;33m\]\u:\w$\[\033[0m\] "
+

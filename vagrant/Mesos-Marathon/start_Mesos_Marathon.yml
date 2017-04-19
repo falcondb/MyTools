@@ -1,0 +1,21 @@
+- hosts: all
+  sudo: True
+  gather_facts: yes
+  remote_user: "{{ansible_ssh_user}}"
+
+  tasks:
+  - name: Start install server
+    shell : "sudo rpm -Uvh http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm; \
+            sudo yum -y install mesos marathon; \
+            sudo yum -y install mesosphere-zookeeper;"
+
+  - name: Start config server
+    shell : "echo {{MyID}} > /var/lib/zookeeper/myid; \
+            echo server.{{MyID}}={{MyIP}}:2888:3888 > /etc/zookeeper/conf/zoo.cfg; \
+            echo zk://{{IPsPorts}}/mesos > /etc/mesos/zk; \
+            echo 2 > /etc/mesos-master/quorum;"
+
+  - name: Start server
+    shell : "sudo systemctl start zookeeper; \
+            sudo service mesos-master restart; \
+            sudo service marathon restart;"

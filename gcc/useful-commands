@@ -1,0 +1,11 @@
+## linker ##
+ld
+
+## print shared object dependencies ##
+ldd
+
+## display information from object files ##
+objdump
+
+## initialization work of a process ##
+crt0

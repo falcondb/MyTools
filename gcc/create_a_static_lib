@@ -1,0 +1,13 @@
+## steps to create a static lib ###
+
+### compile the source code ###
+gcc -c library.c
+
+### create and add the object file to a lib ###
+ar rc libabc.a library.o
+
+### add a header to the archieve file ###
+ranlib ./libabc.a
+
+### check the symbols in the lib ###
+nm --print-armap ./libabc.a
