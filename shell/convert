@@ -1,0 +1,27 @@
+set -e
+
+Dsuffix=.dc
+Esuffix=e
+
+[[ $# -eq 0 ]] && echo "Usage: You should know. :)"
+
+[[ ! -d $1 ]] && echo "$1 is not a directory. :("
+
+which base64  > /dev/null && which find > /dev/null
+
+if [ $# -eq 2 ] && [ $2 = "-D" ]; then
+
+	find $1 -type f -name "*$Dsuffix" -exec base64 --decode {} -o {}$Esuffix \;
+	set +e
+	for file in $1/*${Dsuffix}${Esuffix}
+	do
+ 		mv "$file" "${file%${Dsuffix}${Esuffix}}"
+	done
+
+	rm $1/*${Dsuffix} 2> /dev/null
+
+else
+
+	find $1 -type f ! -name *$Dsuffix -exec base64 {} -o {}$Dsuffix \;
+
+fi
