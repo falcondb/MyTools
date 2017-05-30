@@ -3,9 +3,9 @@ set -e
 Dsuffix=.dc
 Esuffix=e
 
-[[ $# -eq 0 ]] && echo "Usage: You should know. :)"
+[[ $# -eq 0 ]] && echo "Usage: You should know. :)" && exit
 
-[[ ! -d $1 ]] && echo "$1 is not a directory. :("
+[[ ! -d $1 ]] && echo "$1 is not a directory. :(" && exit
 
 which base64  > /dev/null && which find > /dev/null
 
