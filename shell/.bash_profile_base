@@ -4,7 +4,7 @@ alias dir='ls -l'
 alias cd='function __mycd() { cd $1; echo "PWD: $PWD"; }; __mycd'
 alias gh='history | grep'
 alias mysh='ssh -X'
-alias mykill=function __mykill() { kill -9 $(pgrep $1 }; __mykill'
+alias mykill='function __mykill() { kill -9 $(pgrep $1 }; __mykill'
 
 HISTSIZE=100000
 HISTFILESIZE=2000
