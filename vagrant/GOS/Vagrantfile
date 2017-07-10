@@ -1,0 +1,19 @@
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "williamyeh/centos7-docker"
+  config.hostmanager.enabled = true
+  config.hostmanager.manage_host = true
+  config.hostmanager.manage_guest = true
+  config.vm.provision :shell, path: "bootstrap.sh"
+  config.vm.synced_folder "/Users/yma/hobby/myGit/", "/home/synced/"
+
+  config.vm.define :gos do |server|
+    server.vm.hostname = 'Magenta'
+    server.vm.network :private_network, :ip => '192.168.11.2'
+    server.vm.provision :hostmanager
+    server.vm.provider "virtualbox" do |v|
+      v.memory = 1024
+      v.cpus = 1
+    end
+  end
+end
