@@ -1,0 +1,162 @@
+### Basic settings
+export JAVA_HOME=/Library/Java/Home
+export TOMCAT_HOME=${ADA_BRANCH}/runtime/Tomcat-7
+
+### Oracle staff
+export ORACLE_SID=anaconda
+export ORACLE_HOME=${HOME}/Tools/Oracle/instantclient_12_1
+export TWO_TASK=anaconda
+export PATH=${PATH}:${ORACLE_HOME}
+export TNS_ADMIN=${ORACLE_HOME}
+export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${ORACLE_HOME}
+export AP_OVERRIDE_DB_HOST=o11g
+export AP_OVERRIDE_BLOB_DIR=/opt/oracle/ap_override_blob_dir
+
+### Adaptive code depot
+export ADA_DEPOT=${HOME}/adaptive/workspace/p4/depot
+CURRENT_BRANCH=area51
+ADA_BRANCH=${ADA_DEPOT}/$CURRENT_BRANCH
+export AB=$ADA_BRANCH
+export UTESTPATH=${ADA_DEPOT}/test/unit/results/html
+
+### Adaptive unit test staff
+export STORY=${HOME}/adaptive/stories
+export ORACLE_IMAGE_PATH="${HOME}/Tools/VMware/o11gImage"
+export ORACLE_CLEAN_SNAPSHOT="Oracle11gAdaptive"
+UTEST_CHECKIN="cin"
+UTEST_ALL="all"
+UTEST_LOG="tests.log"
+
+alias vosql='sqlplus sys/sys as sysdba@anaconda'
+alias eclipse='/Applications/eclipse/eclipse  2>&- 1>&-  &'
+
+function ee() {
+  echo -e "\033[31m\033[5mError: $1\033[0m"
+}
+
+function ew() {
+  echo -e "\033[33m\033[5m$1\033[0m"
+}
+
+function workplace() {
+   cd $ADA_BRANCH
+   [ `pgrep eclipse` ] || eclipse
+ }
+
+function restart_tomcat() {
+  pushd .
+  ## if ADA_BRANCH is set, use ADA_BRANCH instead of current dictionary
+  [ -d ${ADA_BRANCH}/build ] && cd ${ADA_BRANCH}/build
+  [ ! -f ./build_env.sh  ] && ee "Not in the build directory." && return 1
+  sh -c "source build_env.sh && set -x \
+  ant tomcat.stop && ant tomcat.start"
+  popd
+}
+
+function completely_rebuild_adaptive() {
+  pushd .
+  ## if ADA_BRANCH is set, use ADA_BRANCH instead of current dictionary
+  [ -d ${ADA_BRANCH}/build ] && cd ${ADA_BRANCH}/build
+  [ ! -f ./build_env.sh  ] && ee "Not in the build directory." && return 1
+  sh -c "source build_env.sh && set -x && ant tomcat.stop && \
+  ant clean.app && \
+  ant compile.app -Ddev=1 -Dminify.all=0"
+  popd
+}
+
+function rebuild_adaptive() {
+  pushd .
+  ## if ADA_BRANCH is set, use ADA_BRANCH instead of current dictionary
+  [ -d ${ADA_BRANCH}/build ] && cd ${ADA_BRANCH}/build
+  [ ! -f ./build_env.sh  ] && ee "Not in the build directory." && return 1
+  sh -c "source build_env.sh && set -x && ant compile.app -Ddev=1 -Dminify.all=0"
+  popd
+}
+
+## restore Oracle VM to a clean state
+function restoreDB(){
+  vmrun  start $ORACLE_IMAGE_PATH
+  vmrun revertToSnapshot $ORACLE_IMAGE_PATH $ORACLE_CLEAN_SNAPSHOT
+  vmrun  start $ORACLE_IMAGE_PATH
+  ## check the log from vmrun -T ws list to make sure the VM is up
+}
+
+function backupUnitTestsResults(){
+  [ -z $1 ] && ee "Need the JIRA story number" && return 1
+
+  [ -d ${STORY}/$1 ] || (echo "Creating ${STORY}/$1 " && mkdir ${STORY}/$1)
+
+  [ -z $2 ] && cp -r $UTESTPATH ${STORY}/$1/ \
+    || ( mkdir -p ${STORY}/$1/$2/ 2>&- 1>&- ; cp -rf $UTESTPATH/* ${STORY}/$1/$2/)
+}
+
+function tarUnitTestsResults(){
+    local UNIT_TESTS_TAR=unit_tests.tar.gz
+
+    [ -z $1 ] && ee "Need the JIRA story number" && return 1
+
+    rm ${STORY}/$1/$UNIT_TESTS_TAR > /dev/null
+    tar -czvf ${STORY}/$1/$UNIT_TESTS_TAR ${STORY}/$1/*
+}
+
+function utest_suites() {
+  pushd .
+
+  ## if ADA_BRANCH is set, use ADA_BRANCH instead of current dictionary
+  [ -d $ADA_BRANCH ] && cd $ADA_BRANCH/build
+  [ ! -f ./build_env.sh ] && ee "Not in the build directory." && return 1
+
+  [ -z $1 ] && ee "Unit test suite name" && return 1
+
+  ew "Running the CHECK IN unit test $1" && \
+  sh -c "source build_env.sh && set -x && ant checkin.test -Dtest.include.files=**/$1.java &> $UTEST_LOG" && \
+  return 0
+
+  popd
+}
+
+
+function utest_adaptive() {
+  pushd .
+
+  ## if ADA_BRANCH is set, use ADA_BRANCH instead of current dictionary
+  [ -d $ADA_BRANCH ] && cd $ADA_BRANCH/build
+  [ ! -f ./build_env.sh ] && ee "Not in the build directory." && return 1
+
+  ([ -z $1 ] || [ $1 = $UTEST_CHECKIN ]) && \
+      ew "Running the CHECK IN unit tests" && \
+      sh -c "source build_env.sh && set -x && ant checkin.test &> $UTEST_LOG" && \
+      return 0
+
+  [[ $1 = $UTEST_ALL ]] && \
+      ew "Running ALL the unit tests" && \
+      sh -c "source build_env.sh && set -x && ant unit.test &> $UTEST_LOG" && \
+      return 0
+
+  ee "$1 is not invalid"
+
+  popd
+}
+
+function unit_test() {
+
+  [ -z $1 ] && ee "Need the JIRA story number" && return 1
+
+  ew "recompile the code at $ADA_BRANCH"
+  rebuild_adaptive
+
+  ew "reload Oracle image $ORACLE_CLEAN_SNAPSHOT"
+  restoreDB && sleep 10
+
+  ew "restart Tomcat server"
+  restart_tomcat
+
+  ew "run the check in unit tests"
+  utest_adaptive
+
+  ew "tar the test results to ${STORY}/$1"
+  backupUnitTestsResults $1
+  tarUnitTestsResults $1
+
+  ew "all done!"
+}
