@@ -27,6 +27,12 @@ UTEST_CHECKIN="cin"
 UTEST_ALL="all"
 UTEST_LOG="tests.log"
 
+### Mac or Linux ###
+OSNAMEMAC=MAC
+OSNAMELINUX=LINUX
+[ "$(uname)" == "Darwin" ] && OSNAME=$OSNAMEMAC || ( [ "$(uname)" == "Linux" ] && OSNAME=$OSNAMELINUX  )
+
+
 alias vosql='sqlplus sys/sys as sysdba@anaconda'
 alias eclipse='/Applications/eclipse/eclipse  2>&- 1>&-  &'
 
@@ -159,4 +165,7 @@ function unit_test() {
   tarUnitTestsResults $1
 
   ew "all done!"
+
+  [ "$OSNAME" == $OSNAMEMAC ] && ew "Open the unit test HTML report in your browser" \
+                              && open ${STORY}/$1/html/index.html
 }
