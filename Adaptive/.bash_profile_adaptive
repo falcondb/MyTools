@@ -27,12 +27,20 @@ UTEST_CHECKIN="cin"
 UTEST_ALL="all"
 UTEST_LOG="tests.log"
 
+### Adaptive T9 Cache Diff staff
+export CDSERVER=perf-db01
+CDLOGIN=yma
+
+### Build server staff
+BDSERVER=dev-build01
+
 ### Mac or Linux ###
 OSNAMEMAC=MAC
 OSNAMELINUX=LINUX
 [ "$(uname)" == "Darwin" ] && OSNAME=$OSNAMEMAC || ( [ "$(uname)" == "Linux" ] && OSNAME=$OSNAMELINUX  )
 
 alias eclipse='/Applications/eclipse/eclipse  2>&- 1>&-  &'
+alias pdb='ant reloaddev.db -Dreload.db.threads=11'
 
 function ee() {
   echo -e "\033[31m\033[5mError: $1\033[0m"
@@ -54,6 +62,16 @@ function restart_tomcat() {
   [ ! -f ./build_env.sh  ] && ee "Not in the build directory." && return 1
   sh -c "source build_env.sh && set -x \
   ant tomcat.stop && ant tomcat.start"
+  popd
+}
+
+function rebuild_db() {
+  pushd .
+  ## if ADA_BRANCH is set, use ADA_BRANCH instead of current dictionary
+  [ -d ${ADA_BRANCH}/build ] && cd ${ADA_BRANCH}/build
+  [ ! -f ./build_env.sh  ] && ee "Not in the build directory." && return 1
+  sh -c "source build_env.sh && set -x \
+  ant reloaddev.db -Dreload.db.threads=11"
   popd
 }
 
@@ -117,7 +135,7 @@ function utest_suite() {
 
   ew "reload Oracle image $ORACLE_CLEAN_SNAPSHOT"
   restoreDB
-  sleep 10
+  sleep 5
 
   ew "restart Tomcat server"
   restart_tomcat
@@ -170,10 +188,39 @@ function unit_test() {
 
   ew "tar the test results to ${STORY}/$1"
   backupUnitTestsResults $1
-  tarUnitTestsResults $1
+  #tarUnitTestsResults $1
 
   ew "all done!"
 
   [ "$OSNAME" == $OSNAMEMAC ] && ew "Open the unit test HTML report in your browser" \
                               && open ${STORY}/$1/html/index.html
+}
+
+function cache_diff_report () {
+  [ ! $# -eq 3 ] && echo "Need 3 parameters, base target emailname" && return 1
+  ssh CDLOGIN@CDSERVER 'cache_diff_report.sh $@'
+}
+
+function Remote_build_branch () {
+  [ $# -lt 1 ] && echo "Need at least 1 parameter, buildname emailname(optional) server(optional)" && return 1
+
+  [ -z $2 ] && USER=`whoami` || USER=$2
+  [ -z $3 ] && SERVER=$BDSERVER || SERVER=$3
+  ssh adaptive@${SERVER} 'nohup /home/adaptive/yma/sbin/auto-build $1 $USER &>- &'
+
+  echo "An email will be dropped to ${USER}@adaptiveinsights.com when the build is done."
+}
+
+function print_adaptive_commands () {
+echo "unit_test            => compile restart run_tests collect_results"
+echo "utest_adaptive       => run_tests "
+echo "utest_suite          => run a single test"
+echo "restoreDB            => reload Oracle VM snapshot"
+echo "rebuild_adaptive     => rebuild adaptive without cleaning"
+echo "completely_rebuild_adaptive => rebuild adaptive with cleaning"
+echo "restart_tomcast      => restart Tomcast"
+echo "rebuild_db           => rebuild DB"
+echo "cache_diff_report    => generate diff report from two cache diffs"
+echo "Remote_build_branch  => build a branch on build-server"
+
 }
