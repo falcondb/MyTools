@@ -6,10 +6,9 @@ alias cd='function __mycd() { cd $1; echo "PWD: $PWD"; }; __mycd'
 alias gh='history | grep'
 alias mysh='ssh -X'
 alias grep='grep --color'
-alias mykill='function __mykill() { kill -9 $(pgrep $1 }; __mykill'
+alias fkill='function __mykill() { kill -9 $(pgrep $1); }; __mykill'
 alias p4='/Applications/p4v.app/Contents/MacOS/p4v'
 alias lsport='lsof -Pn -i4'
-
 ### Vagrant commands
 alias vg='vagrant'
 alias vgs='vagrant status'
@@ -18,6 +17,7 @@ alias vgd='vagrant destroy'
 alias vgsh='vagrant ssh'
 alias asp='ansible-playbook'
 alias brew='brew cask'
+alias pg='function __mypg() { ps aux | grep -i -w $1; }; __mypg'
 
 HISTSIZE=100000
 HISTFILESIZE=2000

@@ -60,18 +60,21 @@ function restart_tomcat() {
   ## if ADA_BRANCH is set, use ADA_BRANCH instead of current dictionary
   [ -d ${ADA_BRANCH}/build ] && cd ${ADA_BRANCH}/build
   [ ! -f ./build_env.sh  ] && ee "Not in the build directory." && return 1
-  sh -c "source build_env.sh && set -x \
+  sh -c "source build_env.sh && set -x &&\
   ant tomcat.stop && ant tomcat.start"
   popd
 }
 
 function rebuild_db() {
   pushd .
+
+  [ ! -z $1 ] && local COMPANYDB="-Ddb.test.datasets=$1"
+
   ## if ADA_BRANCH is set, use ADA_BRANCH instead of current dictionary
   [ -d ${ADA_BRANCH}/build ] && cd ${ADA_BRANCH}/build
   [ ! -f ./build_env.sh  ] && ee "Not in the build directory." && return 1
-  sh -c "source build_env.sh && set -x \
-  ant reloaddev.db -Dreload.db.threads=11"
+  sh -c "source build_env.sh && set -x && \
+  ant reloaddev.db -Dreload.db.threads=11 $COMPANYDB"
   popd
 }
 
