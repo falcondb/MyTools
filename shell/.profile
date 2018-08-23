@@ -1,6 +1,5 @@
 alias ltr='ls -ltr'
 alias ll='ls -l'
-alias dir='ls -l'
 alias cd='function __mycd() { cd $1; echo "PWD: $PWD"; }; __mycd'
 alias vg='vagrant'
 alias vgu='vagrant up'
@@ -10,14 +9,19 @@ alias vgd='vg destroy'
 alias asp='ansible-playbook'
 alias dki='function __dki() { docker exec -it $1 bash ; }; __dki'
 alias dk='docker'
-alias wgit='cd /Users/mayi/Work/git/'
-alias pgit='cd /Users/mayi/Hobby/git/'
 alias gh='history | grep'
 alias mysh='ssh -X'
 alias gitaddc='git status | grep modified | egrep '\.c$|\.h$|\.mk.in$|\.ac$|\.am$' | awk -F ' ' '{print $3}' | xargs git add'
 
+MYIP=`ifconfig en0 | grep -w inet  | cut -d " " -f 2`
+
+PS1="\[\033[1;33m\]\A \u@\h:\w$\[\033[0m\] "
+
 HISTSIZE=100000
 HISTFILESIZE=2000
+HISTTIMEFORMAT=’%F %T ‘
+HISTCONTROL=ignoredups
+HISTIGNORE=”pwd:ls:ls –ltr:cd:exit:ssh”
 
 export PATH=$PATH:/usr/local/sbin/
 
@@ -29,6 +33,5 @@ export PATH=$PATH:/usr/local/sbin/
 
 #CLASSPATH=$CLASSPATH:$SCALA_HOME/libexec/lib/scala-library.jar
 
-export EDITOR='subl -w'
+export EDITOR='atom'
 
-PS1="\u:\w$ "
