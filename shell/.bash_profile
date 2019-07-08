@@ -3,12 +3,13 @@ export JFROG_DOCKER_REGI_TOKEN=AP3CCZuVFwPyziBKAWim3oZ4HcP
 export artifactory_user=yma
 export PATH=$PATH:$HOME/3rd-party-libs/zookeeper/bin/
 export GITHOME=$HOME/adaptive/git
+export GOROOT="$(brew --prefix golang)/libexec"
 export ADA_BRANCH=${GITHOME}/planning
 export EDITOR='atom'
 
 alias atom='/Applications/Atom.app/Contents/MacOS/Atom'
 alias ll='ls -alh'
-alias gogit='zsh && cd ${GITHOME}'
+alias gogit='PS1="\[\033[1;33m\]\A \u@\h:\w (\$(git branch 2>/dev/null | grep '^*' | colrm 1 2)) $\[\033[0m\] " && cd ${GITHOME}'
 alias gb='./gradlew clean build'
 alias gb_wo_tests='./gradlew clean build -x test'
 alias gap='./gradlew artifactoryPublish'
