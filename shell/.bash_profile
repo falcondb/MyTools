@@ -1,9 +1,7 @@
-export JFROG_NAME=yma
-export JFROG_DOCKER_REGI_TOKEN=AP3CCZuVFwPyziBKAWim3oZ4HcP
-export artifactory_user=yma
 export PATH=$PATH:$HOME/3rd-party-libs/zookeeper/bin/
 export GITHOME=$HOME/adaptive/git
 export GOROOT="$(brew --prefix golang)/libexec"
+export GOPATH=$HOME/opprojects/goprojects/
 export ADA_BRANCH=${GITHOME}/planning
 export EDITOR='atom'
 
@@ -14,6 +12,7 @@ alias gb='./gradlew clean build'
 alias gb_wo_tests='./gradlew clean build -x test'
 alias gap='./gradlew artifactoryPublish'
 alias perf-repo='ssh adaptive@perf-repo'
+alias t='tree -L 1'
 
 MYIP=`ifconfig en0 | grep -w inet  | cut -d " " -f 2`
 
