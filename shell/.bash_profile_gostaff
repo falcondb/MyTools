@@ -1,0 +1,10 @@
+#!/bin/bash
+
+export GP=$GOPATH
+export GOBIN=$GOPATH/bin/
+export PATH=$PATH::$GOBIN
+
+alias gb='go build'
+alias gi='go install'
+alias gr='go run'
+alias gts='go test -v'
