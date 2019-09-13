@@ -1,9 +1,10 @@
-export PATH=$PATH:$HOME/3rd-party-libs/zookeeper/bin/
+#!/bin/bash
 export GITHOME=$HOME/adaptive/git
 export GOROOT="$(brew --prefix golang)/libexec"
 export GOPATH=$HOME/opprojects/goprojects/
 export ADA_BRANCH=${GITHOME}/planning
 export EDITOR='atom'
+export PATH=$PATH:$HOME/3rd-party-libs/zookeeper/bin/
 
 alias atom='/Applications/Atom.app/Contents/MacOS/Atom'
 alias ll='ls -alh'
@@ -26,4 +27,13 @@ HISTIGNORE=”pwd:ls::cd:exit:ssh”
 
 export EDITOR='atom'
 
+function add_pub_key {
+[[ -z $1 ]] && echo example add_pub_key myname@dnsname
+
+PKEY=$(cat ~/.ssh/id_rsa.pub)
+
+ssh $1 " [[ -d ~/.ssh ]] || mkdir ~/.ssh; echo $PKEY >> ~/.ssh/authorized_keys "
+}
+
 source $HOME/.bash_profile_adaptive
+source $HOME/.bash_profile_gostaff
