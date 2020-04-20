@@ -3,8 +3,10 @@
 export GP=$GOPATH
 export GOBIN=$GOPATH/bin/
 export PATH=$PATH::$GOBIN
+export MK8S=$GOPATH/src/github.com/falcondb/kubernetes
 
 alias gb='go build'
+alias gbd="go build -gcflags '-N -l' "
 alias gi='go install'
 alias gr='go run'
 alias gts='go test -v'
