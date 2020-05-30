@@ -8,7 +8,7 @@ export PATH=$PATH:$HOME/3rd-party-libs/zookeeper/bin/
 export KUBECONFIG=$KUBECONFIG:$HOME/.kube/config
 
 alias atom='/Applications/Atom.app/Contents/MacOS/Atom'
-alias ll='ls -alh --color=auto'
+alias ll='ls -alh '
 alias grep='grep -rn --color=auto'
 alias gogit='PS1="\[\033[1;33m\]\A \u@\h:\w (\$(git branch 2>/dev/null | grep '^*' | cut -f 3 -d ":" | colrm 1 2)) $\[\033[0m\] " && cd ${GITHOME}'
 alias gb='./gradlew clean build'
@@ -18,6 +18,7 @@ alias perf-repo='ssh adaptive@perf-repo'
 alias t='tree -L 1'
 alias k='kubectl'
 alias mygit='cd $GOPATH/src/github.com/falcondb/'
+alias mycommit='git commit --author=falcondb'
 
 MYIP=`ifconfig en0 | grep -w inet  | cut -d " " -f 2`
 
