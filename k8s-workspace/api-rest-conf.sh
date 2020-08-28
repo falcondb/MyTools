@@ -4,23 +4,24 @@ set -x -e
 
 ### install jq, base64, curl, e.g., apt-get/yum update && apt-get/yum install -y jq  base64  curl
 
-kubectl create serviceaccount api-explorer
+kubectl create serviceaccount falcon
 
 cat <<EOF | kubectl apply -f -
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: log-reader
+  name: troubleshooting
 rules:
-- apiGroups: [""] # "" indicates the core API group
-  resources: ["pods", "pods/log"]
-  verbs: ["get", "watch", "list"]
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "namespaces", "service", "relicateset", "deployment"]
+  verbs: ["get", "delete", "list"]
 EOF
+
 
 
 kubectl create rolebinding api-explorer:log-reader --clusterrole log-reader --serviceaccount default:api-explorer
 
-SERVICE_ACCOUNT=api-explorer
+SERVICE_ACCOUNT=default
 
 SECRET=$(kubectl get serviceaccount ${SERVICE_ACCOUNT} -o json | jq -Mr '.secrets[].name | select(contains("token"))')
 
