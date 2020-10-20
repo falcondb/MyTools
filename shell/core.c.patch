@@ -1,0 +1,15 @@
+3445c3445,3446
+<     SrvTk_PRODUCT_ONLY   /* eg: Apache */
+---
+>     SrvTk_PRODUCT_ONLY, /* eg: Apache */
+>     SrvTk_OFF           /* eg: Nothing at all */
+3509c3510,3512
+<     if (ap_server_tokens == SrvTk_PRODUCT_ONLY) {
+---
+>     if (ap_server_tokens == SrvTk_OFF) {
+>         ap_add_version_component(pconf, "");
+>     } else if (ap_server_tokens == SrvTk_PRODUCT_ONLY) {
+3557a3561,3563
+>     }
+>     else if (!strcasecmp(arg, "Off") ) {
+>         ap_server_tokens = SrvTk_OFF;
