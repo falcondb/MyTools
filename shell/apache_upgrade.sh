@@ -1,19 +1,22 @@
 RELVERSION=2.4.46
+
 ROOTPATH=$PWD
-WORKPATH=${ROOTPATH}/apache${RELVERSION}
+APACHENAME=apache${RELVERSION}
+WORKPATH=${ROOTPATH}/$APACHENAME
 PACKPATH=${ROOTPATH}/packages
 APACHEPATH=${PACKPATH}/httpd
 OPENSSLPATH=${PACKPATH}/openssl
 PCREPATH=${PACKPATH}/PCRE
 APRPATH=/usr/local/apr
 SSLLIBPATH=$APACHEPATH/lib/openssl
-
+PLANREPOPATH=$PACKPATH/planning
 
 OSDIST=UNKNOWN
 INSTALLER=
 SUDO=
-NOSTOUT=" >/dev/null"
 CORECPATCH=$ROOTPATH/core.c.patch
+AIAPACHETAR=$PACKPATH/${APACHENAME}.tar.gz
+APAINPLANPAH=$PLANREPOPATH/tools/apache/linux/
 
 PRCEURL="https://sourceforge.net/projects/pcre/files/pcre/8.44/pcre-8.44.tar.gz"
 OPENSSLURL="https://www.openssl.org/source/openssl-1.1.1h.tar.gz"
@@ -68,12 +71,12 @@ function create_paths {
     done
     mkdir -p $ALLPATHS || ( echo "failed to create paths" && popd && return 1)
   else
-    mkdir -p $ALLPATHS $NOSTOUT
+    mkdir -p $ALLPATHS > /dev/null
   fi
 }
 
 function install_apr {
-  pushd . $NOSTOUT
+  pushd . > /dev/null
   cd /tmp/
 
   # install apr
@@ -86,7 +89,7 @@ function install_apr {
   ./configure && make && $SUDO make install || (echo "failed to compile apr " && popd && return 1)
   [ ! -d $APRPATH ] && echo "can't find apr after installing apr from source code" && popd && return 1
   echo "Installed apr package"
-  rm -rf $APR apr-* $NOSTOUT
+  rm -rf $APR apr-* > /dev/null
 
   # install apr-util
   local APRUTIL=aprutil.tar.gz
@@ -97,13 +100,13 @@ function install_apr {
 
   ./configure --with-apr=$APRPATH && make && $SUDO make install || (echo "failed to compile apr util" && popd && return 1)
   echo "Installed apr-util package"
-  rm -rf $APRUTIL apr-util* $NOSTOUT
+  rm -rf $APRUTIL apr-util* > /dev/null
 
-  popd $NOSTOUT
+  popd > /dev/null
 }
 
 function install_pcre {
-  pushd . $NOSTOUT
+  pushd . > /dev/null
   cd /tmp/
 
   # install apr
@@ -115,15 +118,15 @@ function install_pcre {
 
   ./configure --disable-shared --prefix=$PCREPATH && make && $SUDO make install || (echo "failed to compile PRCE " && popd && return 1)
   echo "Installed PRCE package at " $PCREPATH
-  rm -rf $APR apr-* $NOSTOUT
+  rm -rf $APR apr-* > /dev/null
 
-  popd $NOSTOUT
+  popd > /dev/null
 }
 
 function install_openssl {
   local SSLPATH=openssl
   local SSLTAR=openssl.tar.gz
-  pushd . $NOSTOUT
+  pushd . > /dev/null
   cd /tmp/
 
   echo "Installing OpenSSL..."
@@ -133,39 +136,10 @@ function install_openssl {
   make && make install  \
   || (echo "failed to compile OpenSSL " && return 1)
   echo "Installed OpenSSL at " $OPENSSLPATH
-  rm -rf $SSLTAR open* $NOSTOUT
+  rm -rf $SSLTAR open* > /dev/null
 
-  popd $NOSTOUT
+  popd > /dev/null
 }
-
-function install_apache {
-  local APPATH=httpd
-
-  pushd . $NOSTOUT
-
-  echo "Installing Apache HTTPD..."
-  wget $APACHEBASEURL$RELVERSION.tar.gz -O $APPATH && \
-  tar -xzf $APPATH && cd httpd-*
-
-  [ -f $CORECPATCH ] && patch $(find ./ -name core.c) $CORECPATCH || (echo "failed to patch core.c " && popd && return 1)
-
-  ./configure --prefix=$APACHEPATH && make && $SUDO make install || (echo "failed to compile Apache HTTPD " && popd && return 1)
-
-  ./configure --prefix=$APACHEPATH --enable-mods-shared=all \
-              --enable-ssl --with-ssl=$OPENSSLPATH \
-              --with-apxs=$APACHEPATH --with-apr=$APRPATH \
-              --enable-pcre=static --with-pcre=$PCREPATH \
-  && make && $SUDO make install \
-  || (echo "failed to compile Apache " && return 1)
-
-  valid_apache_configure
-
-  echo "Installed Apache HTTPD at " $APACHEPATH
-  rm -rf $APPATH httpd* $NOSTOUT
-
-  popd $NOSTOUT
-}
-
 
 function valid_apache_configure {
   local CONFFILE=$APACHEPATH/conf/httpd.conf
@@ -186,7 +160,7 @@ function valid_apache_configure {
 
 # Assume the function is called within apache source code root path
 function build_mod_jk {
-  pushd . $NOSTOUT
+  pushd . > /dev/null
   local JKPATH=modjk.tar.gz
   echo "Installing mod_jk..."
   wget $MODJKURL -O $JKPATH && \
@@ -198,9 +172,9 @@ function build_mod_jk {
   [ $? == 0 ] && [ -f $APACHEPATH/bin/apxs ] && \
           echo "Installed Amod_jk at " $APACHEPATH || \
           (echo "failed to installed Amod_jk " && popd && return 1)
-  rm -rf $JKPATH tomcat-connectors-* $NOSTOUT
+  rm -rf $JKPATH tomcat-connectors-* > /dev/null
 
-  popd $NOSTOUT
+  popd > /dev/null
 }
 
 function deploy_openssl_to_apach {
@@ -211,4 +185,83 @@ function deploy_openssl_to_apach {
   [ $? == 0 ] && [ -n "$(ls $SSLLIBPATH)" ] \
   && (echo "Deployed Openssl to Appach" && return 0) \
   || (echo "Failed to Deploy Openssl to Appach" && return 1)
+}
+
+function install_apache {
+  local APPATH=httpd
+
+  pushd . > /dev/null
+
+  echo "Installing Apache HTTPD..."
+  wget $APACHEBASEURL$RELVERSION.tar.gz -O $APPATH && \
+  tar -xzf $APPATH && cd httpd-*
+
+  [ -f $CORECPATCH ] && patch $(find ./ -name core.c) $CORECPATCH || (echo "failed to patch core.c " && popd && return 1)
+
+  ./configure --prefix=$APACHEPATH && make && $SUDO make install || (echo "failed to compile Apache HTTPD " && popd && return 1)
+
+  ./configure --prefix=$APACHEPATH --enable-mods-shared=all \
+              --enable-ssl --with-ssl=$OPENSSLPATH \
+              --with-apxs=$APACHEPATH --with-apr=$APRPATH \
+              --enable-pcre=static --with-pcre=$PCREPATH \
+  && make && $SUDO make install \
+  || (echo "failed to compile Apache " && return 1)
+
+  valid_apache_configure
+
+  echo "Installed Apache HTTPD at " $APACHEPATH
+  rm -rf $APPATH httpd* > /dev/null
+
+  popd > /dev/null
+}
+
+
+function tarball_appach {
+  tar -czf ${AIAPACHETAR} $APACHEPATH  && echo "Made a tarball for AI Apache " ${AIAPACHETAR} && return 0
+  echo "Failed to made a tarball for AI Apache" && return 1
+}
+
+function clone_planning_repo {
+  git  clone -q https://github.adaptiveinsights.com/AdaptiveInsights/planning.git $PLANREPOPATH \
+  || (echo "Failed to clone Planning repo"; return 1)
+
+  echo "Planning is cloned at $PLANREPOPATH" && return 0
+}
+
+function configure_planning_repo {
+  [ -n $1 ] && PLANREPOPATH=$1 && echo "Configuring Planning at $PLANREPOPATH ..."
+  pushd . > /dev/null
+
+  set -e
+  cd $PLANREPOPATH
+  local PREAPACHE=$(find $APAINPLANPAH -type d -d 1 -name apache*)
+  tar -xzf $AIAPACHETAR -C $APAINPLANPAH
+
+  chmod --reference $PREAPACHE $APAINPLANPAH
+
+  cp -p $PREAPACHE/bin/envvars $APAINPLANPAH/bin/envvars
+  cp -rp $PREAPACHE/conf $APAINPLANPAH/conf
+
+  update_apache_conf_files
+
+  cp -rp $PREAPACHE/zap_apache_config.pl $APAINPLANPAH/zap_apache_config && [ -x $APAINPLANPAH/zap_apache_config ]
+  cp -rp $PREAPACHE/htdocs $APAINPLANPAH/htdocs
+
+  // TODO: the startup.sh, hosts, web and etc.
+
+  sed -i 'export APACHE_VERSION=.*/APACHE_VERSION=${APACHENAME}' build/build_env.sh
+  sed -i 'setenv APACHE_DIR_ORIG.*/APACHE_DIR_ORIG ${APACHENAME}' tools/hosting/upgrade/target/ap_build_install
+  sed -i 'setenv APACHE_DIR_ORIG.*/APACHE_DIR_ORIG ${APACHENAME}' tools/hosting/upgrade/target/ap_build_web_install
+
+  git commit -a -m "Configured apachd with version $RELVERSION"
+  git push
+
+  set +e
+  popd > /dev/null
+}
+
+
+function update_apache_conf_files {
+  // TODO
+  return 1
 }
