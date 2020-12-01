@@ -225,6 +225,8 @@ function clone_planning_repo {
   git  clone -q https://github.adaptiveinsights.com/AdaptiveInsights/planning.git $PLANREPOPATH \
   || (echo "Failed to clone Planning repo"; return 1)
 
+  [[ -n $1 ]] && git checkout $1 && echo "Switched to branch $1"
+
   echo "Planning is cloned at $PLANREPOPATH" && return 0
 }
 
@@ -234,24 +236,26 @@ function configure_planning_repo {
 
   set -e
   cd $PLANREPOPATH
-  local PREAPACHE=$(find $APAINPLANPAH -type d -d 1 -name apache*)
+  local REAPACHE=$(find tools/apache/linux/ -maxdepth 1 -type d -name apache* )
   tar -xzf $AIAPACHETAR -C $APAINPLANPAH
 
   chmod --reference $PREAPACHE $APAINPLANPAH
 
+  rm -rf $APAINPLANPAH/bin/envvars $APAINPLANPAH/conf && mkdir -p $APAINPLANPAH/bin/ $APAINPLANPAH/conf
   cp -p $PREAPACHE/bin/envvars $APAINPLANPAH/bin/envvars
-  cp -rp $PREAPACHE/conf $APAINPLANPAH/conf
+  cp -rp $PREAPACHE/conf $APAINPLANPAH
 
   update_apache_conf_files
 
   cp -rp $PREAPACHE/zap_apache_config.pl $APAINPLANPAH/zap_apache_config && [ -x $APAINPLANPAH/zap_apache_config ]
-  cp -rp $PREAPACHE/htdocs $APAINPLANPAH/htdocs
+  cp -rp $PREAPACHE/htdocs $APAINPLANPAH/
 
-  // TODO: the startup.sh, hosts, web and etc.
+  local APACHEPLANPATH=${APACHENAME}-build1
+  mv $APAINPLANPAH $APAINPLANPAH/web/$APACHEPLANPATH
 
-  sed -i 'export APACHE_VERSION=.*/APACHE_VERSION=${APACHENAME}' build/build_env.sh
-  sed -i 'setenv APACHE_DIR_ORIG.*/APACHE_DIR_ORIG ${APACHENAME}' tools/hosting/upgrade/target/ap_build_install
-  sed -i 'setenv APACHE_DIR_ORIG.*/APACHE_DIR_ORIG ${APACHENAME}' tools/hosting/upgrade/target/ap_build_web_install
+  sed -i "s/export APACHE_VERSION=.*/export APACHE_VERSION=${APACHEPLANPATH}/g" build/build_env.sh
+  sed -i "s/setenv APACHE_DIR_ORIG.*/setenv APACHE_DIR_ORIG ${APACHEPLANPATH}/g" tools/hosting/upgrade/target/ap_build_install
+  sed -i "s/setenv APACHE_DIR_ORIG.*/setenv APACHE_DIR_ORIG ${APACHEPLANPATH}/g" tools/hosting/upgrade/target/ap_build_web_install
 
   git commit -a -m "Configured apachd with version $RELVERSION"
   git push
@@ -262,6 +266,7 @@ function configure_planning_repo {
 
 
 function update_apache_conf_files {
-  // TODO
+  // workers.java_home does not exit in conf/workers.properties anymore in AI-Apache-2.4.35
+  // startup.sh, shutdown.sh does not exit in AI-Apache-2.4.35
   return 1
 }
