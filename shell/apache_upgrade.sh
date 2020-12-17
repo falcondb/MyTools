@@ -243,6 +243,7 @@ function configure_planning_repo {
 
   rm -rf $APAINPLANPAH/bin/envvars $APAINPLANPAH/conf && mkdir -p $APAINPLANPAH/bin/ $APAINPLANPAH/conf
   cp -p $PREAPACHE/bin/envvars $APAINPLANPAH/bin/envvars
+  cp -p $PREAPACHE/bin/apachectl $APAINPLANPAH/bin/apachectl
   cp -rp $PREAPACHE/conf $APAINPLANPAH
 
   update_apache_conf_files
