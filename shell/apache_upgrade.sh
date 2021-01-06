@@ -271,3 +271,10 @@ function update_apache_conf_files {
   // startup.sh, shutdown.sh does not exit in AI-Apache-2.4.35
   return 1
 }
+
+
+function httpd_debugging {
+  SHTTPD=$(systemctl --type=service | grep httpd)
+  systemctl status $SHTTPD
+  $SUDO journalctl -u $SHTTPD
+}

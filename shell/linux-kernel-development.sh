@@ -6,6 +6,8 @@ OSARCH=$(uname -m)
 QEMUBIN=qemu-system-$OSARCH
 
 TOOLS=/home/work/github.com
+LSRC=$TOOLS/linux
+RTFS=$TOOLS/buildroot
 
 function install-tools {
   $SUDO $INSTALLER install -y build-essential kernel-package fakeroot libncurses5-dev libssl-dev ccache flex bison libelf-dev
@@ -29,7 +31,7 @@ function build-configuration {
 
   [[ ! -x ./vmlinux ]] && echo "Kernel executable doesn't exit!" && return 4
 
-  # try gdb ./vmlinux to play with the kernel
+  # try gdb ./vmlinux to play with the kernel. Check out the GDB script apropos lx
 }
 
 function build-root-fs {
