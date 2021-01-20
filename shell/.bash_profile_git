@@ -1,8 +1,6 @@
-alias wgit='cd /Users/mayi/Work/git/'
-alias pgit='cd /Users/mayi/Hobby/git/'
-
 alias gitst='git status | less'
 alias gitAddAll='git add -A'
+alias gitcam='git comit -a -m'
 alias gitCiCProj="git status | grep modified | egrep '\.c$|\.h$|\.mk.in$|\.ac$|\.am$' | awk -F ' ' '{print $3}' | xargs git add"
 
 alias gitQuickPushRemote='function __gitqpr() { [ "x$1" != "x" ] && git commit -m "$1" && \

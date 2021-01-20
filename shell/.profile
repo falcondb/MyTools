@@ -21,7 +21,14 @@ HISTSIZE=100000
 HISTFILESIZE=2000
 HISTTIMEFORMAT=’%F %T ‘
 HISTCONTROL=ignoredups
-HISTIGNORE=”pwd:ls:ls –ltr:cd:exit:ssh”
+HISTIGNORE=”pwd:ls:ls –ltr:cd:cp:rm:mv:echo:test:exit:cat:less:vi”
+
+shopt -s autocd
+shopt -s cdable_vars
+shopt -s cdspell
+shopt -s checkhash
+shopt -s cmdhist
+shopt -s dirspell
 
 export PATH=$PATH:/usr/local/sbin/
 
@@ -34,4 +41,3 @@ export PATH=$PATH:/usr/local/sbin/
 #CLASSPATH=$CLASSPATH:$SCALA_HOME/libexec/lib/scala-library.jar
 
 export EDITOR='atom'
-
