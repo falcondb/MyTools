@@ -34,10 +34,7 @@ export PATH=$PATH:/usr/local/sbin/
 
 #JAVA_HOME=/Library/Java/Home
 #export JAVA_HOME;
-
-#SCALA_HOME=/usr/local/opt/scala/
-#export SCALA_HOME
-
 #CLASSPATH=$CLASSPATH:$SCALA_HOME/libexec/lib/scala-library.jar
+
 
 export EDITOR='atom'
