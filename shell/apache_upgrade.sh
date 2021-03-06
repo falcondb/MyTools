@@ -273,8 +273,23 @@ function update_apache_conf_files {
 }
 
 
+function add-apache-slibs{
+  // add libapr, libaprutil, modules mod_mpm_event.so
+
+  sed "s%prefix=.*%prefix=/opt/adaptiveplanning/live_build/apache2/lib/openssl/g" lib/openssl/*.pc
+
+  disable mpm module in conf/httpd.conf
+}
+
+
+
+
 function httpd_debugging {
-  SHTTPD=$(systemctl --type=service | grep httpd)
+  SHTTPD=$(systemctl --type=service | grep httpd | awk '{print $1}')
   systemctl status $SHTTPD
   $SUDO journalctl -u $SHTTPD
+
+  SADAPA=$(systemctl --type=service | grep pbu-planning.service | awk '{print $1}')
+  systemctl status $SADAPA
+  $SUDO journalctl -u $SADAPA
 }

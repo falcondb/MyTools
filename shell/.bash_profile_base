@@ -7,15 +7,7 @@ alias gh='history | grep'
 alias mysh='ssh -X'
 alias grep='grep --color'
 alias fkill='function __mykill() { kill -9 $(pgrep $1); }; __mykill'
-alias p4='/Applications/p4v.app/Contents/MacOS/p4v'
 alias lsport='lsof -Pn -i4'
-### Vagrant commands
-alias vg='vagrant'
-alias vgs='vagrant status'
-alias vgu='vagrant up'
-alias vgd='vagrant destroy'
-alias vgsh='vagrant ssh'
-alias asp='ansible-playbook'
 alias brew='brew cask'
 alias pg='function __mypg() { ps aux | grep -i -w $1; }; __mypg'
 
@@ -31,6 +23,13 @@ function ee() {
 function ew() {
    [[ $# -eq 1 ]] && echo -e "\e[5m$1\e[25mNormal"
  }
+
+function download_pdf {
+  [[ $# -eq 2 ]] || ( ee "First augument is the URL, second is the file name (without suffix .pdf)" )
+  local titlename=$(echo "$2" | | tr ' ' '-' | tr ':' '-')
+  wget $1 -O ${titlename}.pdf
+
+}
 
 function make_tunnel() {
 if [[ $# -ne 3 ]]; then
