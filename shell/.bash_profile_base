@@ -25,10 +25,9 @@ function ew() {
  }
 
 function download_pdf {
-  [[ $# -eq 2 ]] || ( ee "First augument is the URL, second is the file name (without suffix .pdf)" )
-  local titlename=$(echo "$2" | | tr ' ' '-' | tr ':' '-')
+  [[ ! $# -eq 2 ]] && ee "First augument is the URL, second is the file name (without suffix .pdf)" && return 1
+  local titlename=$(echo "$2" | tr ' ' '-' | tr ':' '-')
   wget $1 -O ${titlename}.pdf
-
 }
 
 function make_tunnel() {
@@ -65,13 +64,9 @@ function fs_mount() {
   sudo sshfs -o allow_other,defer_permissions,IdentityFile=~/.ssh/id_rsa $1 $2
 }
 
-PS1="\[\033[1;33m\]\u@\h:\w$\[\033[0m\] "
 # Added by install_latest_perl_osx.pl
 #[ -r /Users/yma/.bashrc ] && source /Users/yma/.bashrc
 
-### work related profile ###
-source $HOME/.bash_profile_adaptive
-source $HOME/.bash_profile_adaptive_base
 
 ## command to disable .DS_Store file in MacOS
 # defaults write com.apple.desktopservices DSDontWriteNetworkStores true

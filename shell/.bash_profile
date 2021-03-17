@@ -22,7 +22,8 @@ alias mycommit='git commit --author=falcondb'
 
 MYIP=`ifconfig en0 | grep -w inet  | cut -d " " -f 2`
 
-PS1="\[\033[1;33m\]\A \u@\h:\w$\[\033[0m\] "
+# the following PS1 doesn't work with zsh, it was working with previous sh
+#PS1="\[\033[1;33m\]\A \u@\h:\w$\[\033[0m\] "
 
 HISTSIZE=100000
 HISTFILESIZE=2000
