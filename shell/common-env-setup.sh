@@ -9,6 +9,9 @@ function configure_envs {
   elif [ $(grep -i suse /etc/os-release | wc -l) -ne 0  ]; then
     OSDIST=suse
     which zypper > /dev/null && INSTALLER=zypper
+  elif [ $(grep -i debian /etc/os-release | wc -l) -ne 0  ]; then
+    OSDIST=debian
+    which apt > /dev/null && INSTALLER=apt
   elif [ $(grep -i Ubuntu /etc/lsb-release | wc -l) -ne 0 ]; then
     OSDIST=ubuntu
     which apt > /dev/null &&   INSTALLER=apt
@@ -16,6 +19,9 @@ function configure_envs {
     echo No package installer found!
     return 1
   fi
+
+  echo "OS Distribution : $OSDIST"
+  echo "Installer       : $INSTALLER"
 
   if [ "$EUID" -ne "0" ]; then
       SUDO="sudo "
