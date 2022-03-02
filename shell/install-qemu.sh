@@ -29,3 +29,10 @@ function restartLibvertd {
 sudo modprobe kvm-intel
 
 cp -v /etc/libvirt/libvirt.conf ~/.config/libvirtd/libvirt.conf
+
+
+
+function compile-qemu {
+  $SSUDO apt install -y libglib2.0-dev libffi-dev
+
+}

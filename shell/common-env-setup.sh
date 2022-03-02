@@ -3,28 +3,30 @@
 function configure_envs {
 
   if [ $(grep -i centos /etc/os-release | wc -l) -ne 0  ]; then
-    OSDIST=centos
-    which yum > /dev/null && INSTALLER=yum
-    which dnf > /dev/null && INSTALLER=dnf
+    OS=centos
+    which yum > /dev/null && INS=yum
+    which dnf > /dev/null && INS=dnf
   elif [ $(grep -i suse /etc/os-release | wc -l) -ne 0  ]; then
-    OSDIST=suse
-    which zypper > /dev/null && INSTALLER=zypper
+    OS=suse
+    which zypper > /dev/null && INS=zypper
   elif [ $(grep -i debian /etc/os-release | wc -l) -ne 0  ]; then
-    OSDIST=debian
-    which apt > /dev/null && INSTALLER=apt
+    OS=debian
+    which apt > /dev/null && INS=apt
   elif [ $(grep -i Ubuntu /etc/lsb-release | wc -l) -ne 0 ]; then
-    OSDIST=ubuntu
-    which apt > /dev/null &&   INSTALLER=apt
+    OS=ubuntu
+    which apt > /dev/null && INS=apt
   else
     echo No package installer found!
     return 1
   fi
 
+  export OSDIST=$OS
+  export INSTALLER=$INS
   echo "OS Distribution : $OSDIST"
   echo "Installer       : $INSTALLER"
 
   if [ "$EUID" -ne "0" ]; then
-      SUDO="sudo "
+      export SUDO="sudo "
   fi
 }
 
