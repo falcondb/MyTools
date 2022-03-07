@@ -11,9 +11,9 @@ $SUDO $INSTALLER install qemu qemu-utils qemu-kvm virt-manager libvirt-daemon-sy
 
 function addUser2QM {
   local USER=$(whoami)
-  [[ $SUDO getent group | grep $QEMUGROUP ]] || $SUDO groupadd --system $QEMUGROUP
+  [[ $($SUDO getent group | grep $QEMUGROUP) ]] || $SUDO groupadd --system $QEMUGROUP
 
-  [[ id $USER | grep $QEMUGROUP ]] || $SUDO usermod -a -G  $QEMUGROUP  $USER
+  [[ $(id $USER | grep $QEMUGROUP) ]] || $SUDO usermod -a -G  $QEMUGROUP  $USER
 
   id $USER | grep $QEMUGROUP
 }
@@ -33,6 +33,6 @@ cp -v /etc/libvirt/libvirt.conf ~/.config/libvirtd/libvirt.conf
 
 
 function compile-qemu {
-  $SSUDO apt install -y libglib2.0-dev libffi-dev
+  $SUDO apt install -y libglib2.0-dev libffi-dev ninja-build libpixman-1-dev
 
 }
