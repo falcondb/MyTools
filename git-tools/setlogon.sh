@@ -8,3 +8,6 @@ git config --global user.name $1
 git config --global user.email $2
 
 git config credential.helper store
+
+// update submodule
+git submodule update --init --recursive
