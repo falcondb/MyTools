@@ -5,13 +5,16 @@ fi
 OSARCH=$(uname -m)
 QEMUBIN=qemu-system-$OSARCH
 
-TOOLS=/home/work/github.com
+TOOLS=~/work/github.com
 [[ -n $GITROOT ]] && TOOLS=$GITROOT
 
 LSRC=$TOOLS/linux
 RTFS=$TOOLS/buildroot
+IMAGENAME=mydisk.img
+UBIMG=/tmp/ubuntu.qcow2
 
 KERNISOFILE=kernel_iso.iso
+HOSTSSHPORTMAP=65022
 
 function install-tools {
   $SUDO $INSTALLER install -y build-essential kernel-package fakeroot libncurses5-dev libssl-dev ccache flex bison libelf-dev
@@ -65,7 +68,7 @@ function build-root-fs {
   cd $TOOLS
   git clone https://github.com/buildroot/buildroot.git && cd buildroot && RTFS=$PWD
 
-  # select
+  # select rootfs file type, default is tarball
   make menuconfig
 
   make -j8 || (echo "building root fs failed!"; return 5)
@@ -89,12 +92,67 @@ function build-root-fs {
 function run-qemu {
   [[ -z $1 ]] && KIMG=$LSRC/arch/x86/boot/bzImage || KIMG=$1
   [[ -z $2 ]] && RTPATH=$RTFS/output/images/rootfs.ext2 || RTPATH=$2
-  $QEMUBIN -kernel $KIMG \
-    -boot c -m 2049M -hda $RTPATH \
+  $QEMUBIN -s -kernel $KIMG \
+    -boot c -m 4096M -hda $RTPATH \
+    -cpu host \
     -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" \
     -serial stdio -display none -enable-kvm -no-reboot
 }
 
+
+function run-qemu {
+  [[ -z $1 ]] && KIMG=$LSRC/arch/x86/boot/bzImage || KIMG=$1
+  [[ -z $2 ]] && RTPATH=$RTFS/output/images/rootfs.ext2 || RTPATH=$2
+  $QEMUBIN -s -kernel $KIMG \
+    -boot c -m 4096M \
+    -cpu host \
+    -hda file=$UBIMG,index=0,media=disk,format=raw \
+    -netdev user,id=vnet,hostfwd=:0.0.0.0:10027-:22 -device virtio-net-pci,netdev=vnet \
+    -vnc :13 \
+    -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" \
+    -serial stdio -display none -enable-kvm -no-reboot
+}
+
+function run-qemu-with-host-port-mapping {
+
+  qemu-system-x86_64 \
+    -drive "file=./ubuntu-18.04.1-desktop-amd64.snapshot.qcow2,format=qcow2" \
+    -enable-kvm \
+    -m 4G \
+    -smp 4 \
+    -netdev user,id=vnet,hostfwd=:0.0.0.0:$HOSTSSHPORTMAP-:22 \
+    -device virtio-net-pci,netdev=vnet \
+    -serial stdio -display none
+
+}
+
+function run-qemu-with-host-port-mapping-debug {
+
+  qemu-system-x86_64 \
+    -s -S \
+    -drive "file=./ubuntu-18.04.1-desktop-amd64.snapshot.qcow2,format=qcow2" \
+    -enable-kvm \
+    -m 4G \
+    -smp 4 \
+    -netdev user,id=vnet,hostfwd=:0.0.0.0:$HOSTSSHPORTMAP-:22 \
+    -device virtio-net-pci,netdev=vnet \
+    -serial stdio -display none
+
+# gdb vmlinux -> target remote :1234
+
+}
+
+function qemu-ssh {
+  ssh -p $HOSTSSHPORTMAP falcon@home-lab
+}
+
+
+
+
+
+function test-compile-commit {
+  git rebase $1 -x 'make -j`nproc` bzImage'
+}
 
 
 function update-kernel-ISO {
@@ -121,12 +179,16 @@ function update-kernel-ISO {
 }
 
 
+function create-qemu-image {``
+  qemu-img create -f qcow2 $IMAGENAME 40g
+}
+
 
 function run-qemu-iso {
   [[ -z $1 ]] && KIMG=$LSRC/arch/x86/boot/bzImage || KIMG=$1
-  [[ -z $2 ]] && RTPATH=$RTFS/output/images/rootfs.ext2 || RTPATH=$2
+  [[ -z $2 ]] && RTPATH=$RTFS/output/images/rootfs.tar || RTPATH=$2
   $QEMUBIN -kernel $KIMG \
-    -boot c -m 2049M -boot d -cdrom $RTPATH -hda mydisk.img\
+    -boot c -m 2049M -boot d -cdrom $RTPATH -hda $IMAGENAME \
     -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" \
     -serial stdio -display none -enable-kvm -no-reboot
 
