@@ -147,9 +147,6 @@ function qemu-ssh {
 }
 
 
-
-
-
 function test-compile-commit {
   git rebase $1 -x 'make -j`nproc` bzImage'
 }
