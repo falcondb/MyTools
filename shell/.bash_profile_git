@@ -8,5 +8,15 @@ alias gitQuickPushRemote='function __gitqpr() { [ "x$1" != "x" ] && git commit -
 
 
 function apply-patch {
-git apply --ignore-space-change --verbose --reject  $1
+  git apply --ignore-space-change --verbose --reject  $1
 }
+
+function format-patch {
+  [[ -z $@ ]] && git format-patch -1 HEAD \
+	 git format-patch $@ 
+}
+
+function git-apply-commit {
+  [[ -n $1 ]] && git am < $1
+}
+
