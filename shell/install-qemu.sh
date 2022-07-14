@@ -26,13 +26,13 @@ function restartLibvertd {
 
 ## make sure the Virtualization Technology is enabled in the BIOS configuration
 
-sudo modprobe kvm-intel
-
-cp -v /etc/libvirt/libvirt.conf ~/.config/libvirtd/libvirt.conf
-
+## libvirt
+## cp -v /etc/libvirt/libvirt.conf ~/.config/libvirtd/libvirt.conf
 
 
 function compile-qemu {
+  # sudo modprobe kvm-intel
+
   $SUDO apt install -y libglib2.0-dev libffi-dev ninja-build libpixman-1-dev
 
 }
