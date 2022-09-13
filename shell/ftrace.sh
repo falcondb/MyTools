@@ -16,7 +16,7 @@ function mount-ftrace {
 
 
 function set-tracer-pid {
-  [[ -z $1]] && echo "Need the pid" && return 1
+  [[ -z $1 ]] && echo "Need the pid" && return 1
   $SUDO sh -c "echo $1 > /sys/kernel/debug/tracing/set_ftrace_pid"
   cat set_ftrace_pid
 }
@@ -120,7 +120,7 @@ function context-switch-on-comm {
 
   [[ -z $2 ]]  \
     && echo \'$FCOND\' > $FTPATH/events/sched/sched_switch/filter \
-    || echo $FCOND >> $FTPATH/events/sched/sched_switch/filter
+    || echo \'$FCOND\' >> $FTPATH/events/sched/sched_switch/filter
   echo 1 > $FTPATH/events/sched/sched_switch/enable
 
   restart_tracing

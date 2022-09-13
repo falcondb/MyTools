@@ -38,16 +38,22 @@ function build-configuration {
   \cp -v /boot/config-$(uname -r) .config
   make olddefconfig
 
-  #scripts/config --disable SYSTEM_TRUSTED_KEYS
-  #scripts/config --disable SYSTEM_REVOCATION_KEYS
+  ./scripts/config --disable SYSTEM_TRUSTED_KEYS
+  ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 
   make -j8 | tee kernel-build.log && echo "Kernel image is built successfully!" || return 3
 
   [[ ! -x ./vmlinux ]] && echo "Kernel executable doesn't exit!" && return 4
 
+  rm vmlinux-gdb.py
+  dpkg-buildpackage -rfakeroot -Tclean
+
+  $SUDO make deb-pkg LOCALVERSION=-falcondb
+
   $SUDO make bindeb-pkg
   $SUDO make modules_install
   $SUDO make install headers_install
+  # sudo update-initramfs -c -k 5.16.9
   $SUDO update-grub
 
   $SUDO  /usr/sbin/grub-set-default /boot/vmlinuz-$KERNEL_VERSION
@@ -99,16 +105,25 @@ function run-qemu {
     -serial stdio -display none -enable-kvm -no-reboot
 }
 
+  $QEMUBIN -s -kernel $KIMG \
+    -drive "file=./rootfs.qcow2,format=qcow2" \
+    -enable-kvm \
+    -boot c \
+    -m 4G \
+    -smp 4 \
+    -serial stdio -display none
+
+
+
 
 function run-qemu {
   [[ -z $1 ]] && KIMG=$LSRC/arch/x86/boot/bzImage || KIMG=$1
   [[ -z $2 ]] && RTPATH=$RTFS/output/images/rootfs.ext2 || RTPATH=$2
   $QEMUBIN -s -kernel $KIMG \
-    -boot c -m 4096M \
+    -boot c -m 4096M  -hda $RTPATH \
     -cpu host \
-    -hda file=$UBIMG,index=0,media=disk,format=raw \
-    -netdev user,id=vnet,hostfwd=:0.0.0.0:10027-:22 -device virtio-net-pci,netdev=vnet \
-    -vnc :13 \
+    -netdev user,id=vnet,hostfwd=:0.0.0.0:10027-:22 \
+    -device virtio-net-pci,netdev=vnet \
     -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" \
     -serial stdio -display none -enable-kvm -no-reboot
 }
@@ -140,7 +155,15 @@ function run-qemu-with-host-port-mapping-debug {
 
 # gdb vmlinux -> target remote :1234
 
+
+
 }
+
+### TRY IT ###
+# https://stackoverflow.com/questions/65951475/how-to-use-custom-image-kernel-for-ubuntu-in-qemu
+
+# https://m47r1x.github.io/posts/linux-boot/
+# https://docs.windriver.com/bundle/Wind_River_Linux_Users_Guide_3.0_1/page/497722.html
 
 function qemu-ssh {
   ssh -p $HOSTSSHPORTMAP falcon@home-lab
@@ -188,8 +211,6 @@ function run-qemu-iso {
     -boot c -m 2049M -boot d -cdrom $RTPATH -hda $IMAGENAME \
     -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" \
     -serial stdio -display none -enable-kvm -no-reboot
-
-
     #VFS: Unable to mount root fs on unknown-block(8,0) ]---
 }
 
@@ -273,11 +294,11 @@ function build-bpftool-chain {
 
   echo "building libbpf..."
   cd $LSRC/tools/lib/bpf
-  make
+  make clean && make
 
   echo "building bpftool..."
   cd $LSRC/tools/bpf/bpftool
-  make && which bpftool
+  make clean && make && which bpftool
 
   echo "generating vmlinux.h"
 
