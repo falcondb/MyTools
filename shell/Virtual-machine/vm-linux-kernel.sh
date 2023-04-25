@@ -8,12 +8,12 @@ IMGMOUNT=/data00/VMs-ym/playground/$IMGDEV
 qemu-img create -f qcow2 $QIMAGE $QIMGSIZE
 
 #modprobe nbd max_part=8
-sudo qemu-nbd --connect=/dev/$IMGDEV $QIMAGE
+#sudo qemu-nbd --connect=/dev/$IMGDEV $QIMAGE
 
-sudo mkfs.ext4 /dev/$IMGDEV
+#sudo mkfs.ext4 /dev/$IMGDEV
 
-mkdir $IMGMOUNT
-sudo mount /dev/$IMGDEV $IMGMOUNT
+#mkdir $IMGMOUNT
+#sudo mount /dev/$IMGDEV $IMGMOUNT
 #qemu-nbd --disconnect /dev/nbd0
 #umount  $IMGMOUNT
 
