@@ -105,17 +105,6 @@ function run-qemu {
     -serial stdio -display none -enable-kvm -no-reboot
 }
 
-  $QEMUBIN -s -kernel $KIMG \
-    -drive "file=./rootfs.qcow2,format=qcow2" \
-    -enable-kvm \
-    -boot c \
-    -m 4G \
-    -smp 4 \
-    -serial stdio -display none
-
-
-
-
 function run-qemu {
   [[ -z $1 ]] && KIMG=$LSRC/arch/x86/boot/bzImage || KIMG=$1
   [[ -z $2 ]] && RTPATH=$RTFS/output/images/rootfs.ext2 || RTPATH=$2
